@@ -77,55 +77,57 @@ app.post("/sms", function (request, response) {
   });
   //wait for response from apiai
 
-	ro
   req.on('response', function(res) {
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
-    /* sudo code
-      if apiai is ready
+    // sudo code
+      if(res.result.fulfillment.speech == 'Okay')
       {
-        if(ticket)
-        {
-          if many
-          {
-            serviceNow call
-            response.send("<Response><Message>" + link to ticket table + "</Message></Response>");
-          }
-          else
-          {
-            serviceNow call
-            response.send("<Response><Message>" + ticket details + "</Message></Response>");
-          }
+        var textMessage = 'Something Went Wrong';
+        switch (res.result.metadata.intentName) {
+          case 'RequestAll':
+            if(res.result.parameters.RequestedItem == 'incident')
+            {
+              //get results for all incidents
+              //set textMessage to the response from the get
+            }
+            else if (res.result.parameters.RequestedItem == 'ticket')
+            {
+              //get results for all tickets
+              //set textMessage to the response from the get
+            }
+            break;
+
+          case 'RequestOne':
+            if(res.result.parameters.RequestedItem == 'incident')
+            {
+              //get info on incident for number res.result.paramenters.number
+              //set textMessage to the response from the get
+            }
+            else if (res.result.parameters.RequestedItem == 'ticket')
+            {
+              //get info on ticket for number res.result.paramenters.number
+              //set textMessage to the response from the get
+            }
+            break;
+
+          case 'knowledgeSearch':
+            //Get link from search
+            //set textMessage to the response from the get
+            break;
+
+          case apiaiDefaultIntent:
+            break;
         }
-        if(incident)
-        {
-          if many
-          {
-            serviceNow call
-            response.send("<Response><Message>" + link to incident table + "</Message></Response>");
-          }
-          else
-          {
-            serviceNow call
-            response.send("<Response><Message>" + incident details + "</Message></Response>");
-          }
-        }
-        if(knowledgeSearch)
-        {
-          serviceNow call
-          response.send("<Response><Message>" + link to search + "</Message></Response>");
-        }
+        response.send("<Response><Message>" + textMessage + "</Message></Response>");
+
       }
       else
       {
         response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
       }
 
-      console.log(res);
-
-      remove the duplicated code
-    */
+    //
     //respond to twilio with the response from apiai
-    response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
 
     //print out the response from apiai
     console.log(res);
