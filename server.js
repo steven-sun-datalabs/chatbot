@@ -44,6 +44,7 @@ app.set('options', options);
 
 // Register the static html folder. Browser can load html pages under this folder.
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({extended: false}));
 
 // Register the Servicenow session. Secret can be an arbitrary string.
 app.use(session({
@@ -70,7 +71,7 @@ router.delete('/logout', function(req, res) {
 
 app.post("/sms", function (request, response) {
   //print out the body from twilio
-  console.log(request.body);
+  //console.log(request.body);
 
   //send the text from twilio to apiai
   var req = appapiai.textRequest(request.body.Body, {
@@ -78,57 +79,74 @@ app.post("/sms", function (request, response) {
   });
   //wait for response from apiai
 
+<<<<<<< HEAD
 	req.on('response', function(res) {
 
     switch(intent)
 
+=======
+  req.on('response', function(res) {
+>>>>>>> 929fc3eeb50b5a48436698d606b1538fda0a9886
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
-    /* sudo code
-      if apiai is ready
+    // sudo code
+      if(res.result.fulfillment.speech == 'Okay')
       {
-        if(ticket)
-        {
-          if many
-          {
-            serviceNow call
-            response.send("<Response><Message>" + link to ticket table + "</Message></Response>");
-          }
-          else
-          {
-            serviceNow call
-            response.send("<Response><Message>" + ticket details + "</Message></Response>");
-          }
+        var textMessage = 'Something Went Wrong';
+        switch (res.result.metadata.intentName) {
+          case 'RequestAll':
+            if(res.result.parameters.RequestedItem == 'Incident')
+            {
+              //get results for all incidents
+              //set textMessage to the response from the get
+              console.log('All Incidents');
+              textMessage = 'All Incidents';
+            }
+            else if (res.result.parameters.RequestedItem == 'Ticket')
+            {
+              //get results for all tickets
+              //set textMessage to the response from the get
+              console.log('All Tickets');
+              textMessage = 'All Tickets';
+            }
+            break;
+
+          case 'RequestOne':
+            if(res.result.parameters.RequestedItem == 'Incident')
+            {
+              //get info on incident for number res.result.paramenters.number
+              //set textMessage to the response from the get
+              console.log('One Incident');
+              textMessage = 'One Incident';
+            }
+            else if (res.result.parameters.RequestedItem == 'Ticket')
+            {
+              //get info on ticket for number res.result.paramenters.number
+              //set textMessage to the response from the get
+              console.log('One Ticket');
+              textMessage = 'One Ticket';
+            }
+            break;
+
+          case 'knowledgeSearch':
+            //Get link from search
+            //set textMessage to the response from the get
+            console.log('Search');
+            textMessage = 'Search';
+            break;
+
+          case apiaiDefaultIntent:
+            break;
         }
-        if(incident)
-        {
-          if many
-          {
-            serviceNow call
-            response.send("<Response><Message>" + link to incident table + "</Message></Response>");
-          }
-          else
-          {
-            serviceNow call
-            response.send("<Response><Message>" + incident details + "</Message></Response>");
-          }
-        }
-        if(knowledgeSearch)
-        {
-          serviceNow call
-          response.send("<Response><Message>" + link to search + "</Message></Response>");
-        }
+        response.send("<Response><Message>" + textMessage + "</Message></Response>");
+
       }
       else
       {
         response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
       }
 
-      console.log(res);
-
-      remove the duplicated code
-    */
+    //
     //respond to twilio with the response from apiai
-    response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
 
     //print out the response from apiai
     console.log(res);
