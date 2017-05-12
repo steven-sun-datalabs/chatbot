@@ -1,17 +1,10 @@
-# Example REST Client My Work App: Node.js
-This project contains source code for a [Node.js](https://nodejs.org/) web application that interacts with ServiceNow's [REST APIs](https://docs.servicenow.com/bundle/helsinki-servicenow-platform/page/integrate/inbound_rest/concept/c_RESTAPI.html) including a [Scripted REST API](https://docs.servicenow.com/bundle/helsinki-servicenow-platform/page/integrate/custom_web_services/concept/c_CustomWebServices.html). The simple use case is a "MyWork" application which displays a user's current tasks and allows comments to be added. This application demonstrates how to build the MyWork app using Node.js. To see the same use case implemented in iOS, see [Example REST Client My Work App: iOS](https://github.com/ServiceNow/example-restclient-myworkapp-ios).
-
-## Architecture
-Here is an overview of the MyWork application architecture. Note both this Node.js application and the iOS application are represented in the diagram.
-![Architecture diagram](/images/arch_diagram.jpg "Architecture diagram")
-
----------------------------------------------------------------------------
+# Apigee Chatbot (to either be ported directly to server or packaged into custom plug-in) : Node.js
+This project contains source code for a [Node.js](https://nodejs.org/) server that interacts with ServiceNow's [REST APIs](https://docs.servicenow.com/bundle/helsinki-servicenow-platform/page/integrate/inbound_rest/concept/c_RESTAPI.html) including a [Scripted REST API](https://docs.servicenow.com/bundle/helsinki-servicenow-platform/page/integrate/custom_web_services/concept/c_CustomWebServices.html) as well as API.ai's intent identification engine. The simple use case is an end-to-end chatbot application which identifies user intents and returns queries from ServiceNow matching those intents.
 
 ## Prerequisites
 * [Node.js](https://nodejs.org/) installed
 * A ServiceNow instance ([Geneva Patch 3](https://docs.servicenow.com/bundle/geneva-release-notes/page/c2/geneva-patch-3-2.html) or later).
-	* **Don't have a ServiceNow instance?** Get one **FREE** by signing up at https://developer.servicenow.com
-	* Not sure what version of ServiceNow your instance is running?  [Determine running version](http://wiki.servicenow.com/index.php?title=Upgrades_Best_Practices#Prepare_for_Upgrading)
+* An instance of API.ai is iinstalled 
 
 --------------------------------------------------------------------------
 
@@ -19,17 +12,10 @@ Here is an overview of the MyWork application architecture. Note both this Node.
 1. Clone the project and install dependencies
 	* Git clone
 	```bash
-	$ git clone https://github.com/ServiceNow/example-restclient-myworkapp-nodejs.git
-	$ cd example-restclient-myworkapp-nodejs
+	$ cd chatbot-directory
 	$ npm install
 	```
-	--or--
-	* [Download](https://github.com/ServiceNow/example-restclient-myworkapp-nodejs/archive/master.zip) the full project as a Zip file
-	```bash
-	<unzip>
-	$ cd example-restclient-myworkapp-nodejs
-	$ npm install
-	```
+	
 2. Install the **MyWork Update Set** in your ServiceNow instance. This is a ServiceNow scoped application which contains the **Task Tracker API** Scripted REST API and related files. Note that you must have the admin role on your ServiceNow instance to install update sets.
 	1. Obtain the "My Work" update set
 		* Download the update set from [share.servicenow.com](https://share.servicenow.com/app.do#/detailV2/e43cf2f313de5600e77a36666144b0b4/overview)
@@ -81,96 +67,15 @@ $
 --------------------------------------------------------------------------
 
 ## About the application
-In this application, the web browser is the client which makes HTTP calls to the Node.js server 'server.js' to get task details.
+In this application, the client speaks via SMS (handled with Twilio) to the server. The server passes this message to API.ai, which identifies intent. Based on intent, a call to the servicenow developer instance is made.
 
 Server side, the Node application uses the **Task Tracker** Scripted REST API to get the list of tasks assigned to the logged-in user. Dispatchers handle interaction between Node and the ServiceNow instance.
 
-### Functional flow
-
-#### 1. Login
-![Login](/images/login.png)
-
-After starting the Node.js web server, navigate your browser to http://localhost:3000. You're presented with a login page where you need to input your ServiceNow instance name (for example, if your instance URL is https://myinstance.service-now.com, then enter `myinstance` into the Instance text box).
-
-Enter the user ID and password for a user on the instance. This application uses Basic Authentication to manage user authentication with the ServiceNow REST API. When a user enters credentials, an HTTP POST call is made to the `/login` endpoint of the Node.js server), which internally establishes a session to the REST API.
-
-**NOTE**: The application makes all REST API calls from the Node.js server side, as opposed to client side from the web browser. This application could also be refactored so that the API calls would be made from the client (such as using AJAX), but that was not the intention of this example application.
-
-On successful login the user is directed to the `/tasks` endpoint. On failure, the user is directed to the login page to reenter credentials.
-
-After login, the application displays the tasks assigned to the user grouped by task type. The application uses the **Task Tracker API** to retrieve the list of tasks from ServiceNow. The logged in user must have access to view the tasks (such as Incidents, Problems, Tickets) for these tasks to be returned in the REST API and subsequently displayed in the 'MyWork App'.
-
-**> REST API Call:** Get user details (Table API)
-```
-GET /api/now/v2/table/sys_user?user_name=john.doe
-```
-
-#### 2. View my tasks
-![Task List](/images/task_list.png)
-
-Click an item in the list to open the task details.
-
-**> REST API Call:** Get my tasks (Task Tracker API)
-```
-GET /api/x_snc_my_work/v1/tracker/task
-```
-
-#### 3. View task detail/add comment
-![Task Details](/images/task_detail.png)
-
-Comments can be added to a task and will appear on the work notes for the task both in this application as well as within ServiceNow.
-
-**> REST API Calls:** Get comments, Add comment (Task Tracker API, Table API)
-```
-GET /api/now/v2/table/sys_journal_field?element_id=<task_id>
-
-POST /api/x_snc_my_work/v1/tracker/task/{task_id}/comment
-{"comment":"Hello, world!"}
-```
-
-### Application Flow Detail
-![App Flow](/images/node_flow.png)
-
-#### Client side
-On the client side, the application uses [AngularJS](https://angularjs.org/) for client side scripting and interaction with the Node.js server. Each page is associated with an [Angular controller](https://docs.angularjs.org/guide/controller).
-
-| Page	| Controller	|		Details |
-|---------------|-----------------------|-----------------------|
-| login.html 	| [loginController.js](/public/js/loginController.js)	|	Collect user instance and credentials	|
-| task_list.html	| [taskListController.js](/public/js/taskListController.js)	|	List of tasks assigned to the user |
-| task_detail.html	| [taskDetailController.js](/public/js/taskDetailController.js)	|	Details of a single task, view and add comments |
-
-#### Server side
-The Node.js server has 2 components: dispatchers and sn_api module.
-* Dispatchers (`<this repo>/dispatcher`)
-	* Dispatch calls to ServiceNow REST API endpoints using the sn_api module. The 2 dispatchers used by this app are detailed below
-* **sn_api** module (`<this repo>/sn_api`)
-	* Encapsulate the details of sending REST API calls to ServiceNow
-
-`loginDispatcher.js`: handles user authentication. The dispatcher handles calls reaching /login endpoint of Node.js server.
-
-|Node endpoint| HTTP Method |Details|
-|--------|--------|--------|
-|/login  | POST |	Uses the REST Table API to query for user details from the sys_user table (`GET /api/now/v2/table/sys_user`) in ServiceNow. |
-
-`taskDispatcher.js`: handles any task related interaction with ServiceNow instance. The dispatcher handles calls to 3 endpoints.
-
-| Node endpoint |	HTTP Method | Details |
-|--------|-------------|------------|
-| /tasks | GET | Uses the **Task Tracker** Scripted REST API to get tasks assigned to a user (`GET /api/x_snc_my_work/v1/tracker/task`)|
-| /tasks/:task/comments| GET | Uses the REST Table API to query for a task's work notes from the sys_journal_field table (`GET /api/now/v2/table/sys_journal_field`) |
-| /tasks/:task/comments | POST | Uses the **Task Tracker** Scripted REST API to add a comment (work note) to a task (`POST /api/x_snc_my_work/v1/tracker/task/{task_id}/comment`) |
-
 #### Session management
-Two types of sessions are managed by the application, between:
-* Browser and Node.js web application
+Three types of sessions are managed by the application, between:
+* Twilio and Node.js server
+* API.ai and Node.js server
 * Node.js server and ServiceNow instance
-
-When a user enters credentials on the login page, the browser POSTs them to the `/login` endpoint of the Node.js server. The Node.js server creates a session object and makes an HTTP GET to the REST Table API to retrieve the sys_user record from ServiceNow.
-
-If the request is successful then a session is automatically created on ServiceNow and the response contains cookies that can be used to bind to the same session. These cookies are stored in the session object in Node.js. On subsequent calls to ServiceNow REST endpoints, the cookies are retrieved from the session object and applied to outgoing requests.
-
-To process a logout, an HTTP DELETE call is made to the `/logout` endpoint, in which the session object is deleted for the user.
 
 --------------------------------------------------------------------------
 
