@@ -44,6 +44,7 @@ app.set('options', options);
 
 // Register the static html folder. Browser can load html pages under this folder.
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({extended: false}));
 
 // Register the Servicenow session. Secret can be an arbitrary string.
 app.use(session({
@@ -69,7 +70,7 @@ router.delete('/logout', function(req, res) {
 
 app.post("/sms", function (request, response) {
   //print out the body from twilio
-  console.log(request.body);
+  //console.log(request.body);
 
   //send the text from twilio to apiai
   var req = appapiai.textRequest(request.body.Body, {
@@ -85,34 +86,44 @@ app.post("/sms", function (request, response) {
         var textMessage = 'Something Went Wrong';
         switch (res.result.metadata.intentName) {
           case 'RequestAll':
-            if(res.result.parameters.RequestedItem == 'incident')
+            if(res.result.parameters.RequestedItem == 'Incident')
             {
               //get results for all incidents
               //set textMessage to the response from the get
+              console.log('All Incidents');
+              textMessage = 'All Incidents';
             }
-            else if (res.result.parameters.RequestedItem == 'ticket')
+            else if (res.result.parameters.RequestedItem == 'Ticket')
             {
               //get results for all tickets
               //set textMessage to the response from the get
+              console.log('All Tickets');
+              textMessage = 'All Tickets';
             }
             break;
 
           case 'RequestOne':
-            if(res.result.parameters.RequestedItem == 'incident')
+            if(res.result.parameters.RequestedItem == 'Incident')
             {
               //get info on incident for number res.result.paramenters.number
               //set textMessage to the response from the get
+              console.log('One Incident');
+              textMessage = 'One Incident';
             }
-            else if (res.result.parameters.RequestedItem == 'ticket')
+            else if (res.result.parameters.RequestedItem == 'Ticket')
             {
               //get info on ticket for number res.result.paramenters.number
               //set textMessage to the response from the get
+              console.log('One Ticket');
+              textMessage = 'One Ticket';
             }
             break;
 
           case 'knowledgeSearch':
             //Get link from search
             //set textMessage to the response from the get
+            console.log('Search');
+            textMessage = 'Search';
             break;
 
           case apiaiDefaultIntent:
