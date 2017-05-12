@@ -61,11 +61,12 @@ var router = express.Router();
 router.post('/login', loginDispatcher.login);
 router.get('/tasks', taskDispatcher.getTasks);
 router.get('/task/:taskid/comments', taskDispatcher.getComments);
-router.post('/task/:taskid/comments', taskDispatcher.addComment);
 router.delete('/logout', function(req, res) {
     req.session.destroy();
     res.end("Deleted");
 });
+
+//router.post('/task/:taskid/comments', taskDispatcher.addComment);
 
 app.post("/sms", function (request, response) {
   //print out the body from twilio
@@ -77,8 +78,10 @@ app.post("/sms", function (request, response) {
   });
   //wait for response from apiai
 
-	ro
-  req.on('response', function(res) {
+	req.on('response', function(res) {
+
+    switch(intent)
+
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
     /* sudo code
       if apiai is ready
