@@ -19,7 +19,7 @@ var session = require('client-sessions');
 var http = require('http');
 var bodyParser = require('body-parser');
 
-// Authorization between apiai and server: test the single line auth
+// Authorization between apiai and server
 var apiai = require('apiai')
 var appapiai = apiai('8e9d6bf7b5c04ff194aacbffaf995db3');
 
@@ -67,31 +67,53 @@ router.delete('/logout', function(req, res) {
     res.end("Deleted");
 });
 
-//router.post('/task/:taskid/comments', taskDispatcher.addComment);
+// introduction
+
+app.post("/introduction", function (request, response) {
+
+  var textMessage = 'Something Went Wrong';
+  var response =
+
+  //console.log(request.body);
+
+
+  req.on('response', function(res) {
+
+
+  response.send("<Response><Message>" + textMessage + "</Message></Response>");
+
+
+  //respond to twilio with the response from apiai
+
+  //print out the response from apiai
+  console.log(res);
+  });
+
+  req.on('error', function(error) {
+    console.log(error);
+  });
+
+  req.end();
+});
 
 app.post("/sms", function (request, response) {
   //print out the body from twilio
   //console.log(request.body);
 
   //send the text from twilio to apiai
-  var req = appapiai.textRequest(request.body.Body, {
+  var res = appapiai.textRequest(request.body.Body, {
     'sessionId': 123456 //not sure if this needs to be changed????
-  });
-  //wait for response from apiai
+    });
+    //wait for response from apiai
 
-<<<<<<< HEAD
-	req.on('response', function(res) {
-
-    switch(intent)
-
-=======
   req.on('response', function(res) {
->>>>>>> 929fc3eeb50b5a48436698d606b1538fda0a9886
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
     // sudo code
-      if(res.result.fulfillment.speech == 'Okay')
+      if(req.result.fulfillment.speech == 'Okay')
       {
         var textMessage = 'Something Went Wrong';
+
+
         switch (res.result.metadata.intentName) {
           case 'RequestAll':
             if(res.result.parameters.RequestedItem == 'Incident')
