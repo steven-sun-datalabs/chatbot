@@ -1,20 +1,20 @@
 /*
 Copyright © 2016 ServiceNow, Inc.
- 
+
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 /*
- * This is a re-usable module to do tasks related operations with ServiceNow instance. 
+ * This is a re-usable module to do tasks related operations with ServiceNow instance.
  */
 
 module.exports = Task;
 
-function Task(snInstanceURL, snCoookie, options) {
+function Task(snInstanceURL, snCookie, options) {
     this.snInstanceURL = snInstanceURL;
-    this.snCoookie = snCoookie;
+    this.snCookie = snCookie;
     this.options = options;
 }
 
@@ -30,7 +30,7 @@ Task.prototype.getTasks = function (callBack) {
         json: true,
         // Set the cookie to authenticate the request.
         headers: {
-            'Cookie': this.snCoookie
+            'Cookie': this.snCookie
         }
 
     }, function (err, response, body) {
@@ -38,7 +38,7 @@ Task.prototype.getTasks = function (callBack) {
     });
 }
 
-// Adds a comment to the task. 
+// Adds a comment to the task.
 Task.prototype.addComment = function (taskID, comment, callBack) {
     var request = require('request');
     request.debug = this.options.verbose;
@@ -51,7 +51,7 @@ Task.prototype.addComment = function (taskID, comment, callBack) {
             "comment": comment
         },
         headers: {
-            'Cookie': this.snCoookie
+            'Cookie': this.snCookie
         }
     }, function (err, response, body) {
         callBack(err, response, body);
@@ -72,7 +72,7 @@ Task.prototype.getComments = function (taskID, callBack) {
         uri: 'api/now/v2/table/sys_journal_field?sysparm_query=element_id%3D' + taskID + '%5EORDERBYDESCsys_created_on',
         json: true,
         headers: {
-            'Cookie': this.snCoookie
+            'Cookie': this.snCookie
         }
 
     }, function (err, response, body) {

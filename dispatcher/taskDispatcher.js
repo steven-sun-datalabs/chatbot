@@ -1,6 +1,6 @@
 /*
 Copyright © 2016 ServiceNow, Inc.
- 
+
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -11,7 +11,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
  * request using authenticate module should have save the cookie in session.
  */
 module.exports = {
-	// Returns the tasks assigned to user.	
+	// Returns the tasks assigned to user.
     getTasks: function(serverRequest, serverResponse) {
         if (serverRequest.session && serverRequest.session.snConfig && serverRequest.session.snConfig.snCookie) {
             var SNTask = serverRequest.app.get('snTask');
@@ -35,10 +35,10 @@ module.exports = {
                 }
             });
         } else {
-            serverResponse.status(401).send('User sesion invalidated');
+            serverResponse.status(401).send('User session invalidated');
         }
     },
-    // Adds a comments for a given task. Task id is part of the url and comment is send at the request body. Here we 
+    // Adds a comments for a given task. Task id is part of the url and comment is send at the request body. Here we
     // assume the user is a legitimate user and should have logged in and viewed tasks before making this request.
     addComment: function(serverRequest, serverResponse) {
         var bodyString = '';
@@ -47,7 +47,7 @@ module.exports = {
             bodyString += data;
         });
 
-        //After receive all parts, we need to send the message to ServiceNow backend. 
+        //After receive all parts, we need to send the message to ServiceNow backend.
         serverRequest.on('end', function() {
             var body = JSON.parse(bodyString);
             var SNTask = serverRequest.app.get('snTask');

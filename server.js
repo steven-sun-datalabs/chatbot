@@ -67,52 +67,79 @@ router.delete('/logout', function(req, res) {
     res.end("Deleted");
 });
 
-// introduction
+// load the modules
+var BasicAuth = require('../sn_api/basicAuth');
+var Task = require('../sn_api/task');
 
-app.post("/introduction", function (request, response) {
-
-  var textMessage = 'Something Went Wrong';
-  var response =
-
-  //console.log(request.body);
+// FOR POC ONLY:
+// Preset basic read access to admin
 
 
+// set your ServiceNow instance uri, username and password. Make sure you have installed the MyTasks service.
+/*
+var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
+client.authenticate(function(err, response, body, cookie) {
+	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+	client.getTasks(function(err, response, body) {
+	    console.log(JSON.stringify(body).substring(1,1500));
+	});
+});
+*/
+// Introductory response message to prompt the authentication details for the given user
+// Turn this into function to iterate until successful log-in or give up on 5th try
+var jjwwid = "";
+/*
+app.post("/sms", function (request, response) {
+
+  var textMessage = 'Thanks for messaging the J&J Chatbot! To help us help you, please respond with your J&J WWID';
   req.on('response', function(res) {
+    jjwid = res.result.parameters.RequestedItem;
+    //send auth to ServiceNow
 
-
-  response.send("<Response><Message>" + textMessage + "</Message></Response>");
-
-
-  //respond to twilio with the response from apiai
-
-  //print out the response from apiai
-  console.log(res);
+    if(jjwid) {
+      client.authenticate(function(err, response, body, cookie) {
+    }
   });
-
+  //respond to twilio with the response from apiai
   req.on('error', function(error) {
     console.log(error);
-  });
+    response.send("<Response><Message>" + "It seems there's been an error, try again" + "</Message></Response>");
 
+  });
   req.end();
 });
+*/
+
+// Evaluate intent received from api.ai and send corresponding GET request to ServiceNow
 
 app.post("/sms", function (request, response) {
   //print out the body from twilio
   //console.log(request.body);
 
-  //send the text from twilio to apiai
-  var res = appapiai.textRequest(request.body.Body, {
-    'sessionId': 123456 //not sure if this needs to be changed????
-    });
-    //wait for response from apiai
+  // Configures request (gives sessionID #) to API.AI
 
+  var req = appapiai.textRequest(request.body.Body, {
+      'sessionId': 123456 //not sure if this needs to be changed????
+    });
+
+  // 
   req.on('response', function(res) {
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
     // sudo code
+
+      var textMessage = 'Something Went Wrong';
+
       if(req.result.fulfillment.speech == 'Okay')
       {
-        var textMessage = 'Something Went Wrong';
 
+        var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
+        client.authenticate(function(err, response, body, cookie) {
+        	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+        	client.getTasks(function(err, response, body) {
+        	    console.log(JSON.stringify(body));
+              textMessage = JSON.stringify(body).substring(1,1500);
+        	});
+        });
 
         switch (res.result.metadata.intentName) {
           case 'RequestAll':
