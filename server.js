@@ -68,8 +68,8 @@ router.delete('/logout', function(req, res) {
 });
 
 // load the modules
-var BasicAuth = require('../sn_api/basicAuth');
-var Task = require('../sn_api/task');
+var BasicAuth = require('./sn_api/basicAuth');
+var Task = require('./sn_api/task');
 
 // FOR POC ONLY:
 // Preset basic read access to admin
@@ -107,7 +107,7 @@ app.post("/sms", function (request, response) {
   // Configures request (gives sessionID #) to API.AI
 
   var req = appapiai.textRequest(request.body.Body, {
-      'sessionId': 123456 //not sure if this needs to be changed????
+          'sessionId': 123456 //not sure if this needs to be changed????
     });
 
   //
@@ -117,20 +117,25 @@ app.post("/sms", function (request, response) {
 
       var textMessage = 'Something Went Wrong';
 
-      if(req.result.fulfillment.speech == 'Okay')
+      if(res.result.fulfillment.speech == 'Okay')
       {
-
+        /*
         var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
-        client.authenticate(function(err, response1, body, cookie) {
+        client.authenticate(function(err, response, body, cookie) {
         	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
-        	client.getTasks(function(err, response1, body) {
+        	client.getTasks(function(err, response, body) {
         	    console.log(JSON.stringify(body));
 
               textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
-
+              console.log('hello');
               response.send("<Response><Message>" + textMessage + "</Message></Response>");
         	});
         });
+        */
+
+        textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
+        console.log('hello');
+        response.send("<Response><Message>" + textMessage + "</Message></Response>");
       }
       else
       {
@@ -203,7 +208,7 @@ function parseIntent(intent, item, body){
 function getTickets(body, number){
   retVal = '';
   //temp for parsing the full Json
-  for(var i = 0; i &lt; number; i++){
+  for(var i = 0; i < number; i++){
     //grab the first ticket in body, then set body equal to the substring of everything after the ticket
   }
   return retVal;
@@ -212,7 +217,7 @@ function getTickets(body, number){
 function getIncidents(body, number){
   retVal = '';
   //temp for parsing the full Json
-  for(var i = 0; i &lt; number; i++){
+  for(var i = 0; i < number; i++){
     //grab the first incident in body, then set body equal to the substring of everything after the incident
   }
   return retVal;
