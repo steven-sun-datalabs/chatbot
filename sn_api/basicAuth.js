@@ -1,6 +1,6 @@
 /*
 Copyright © 2016 ServiceNow, Inc.
- 
+
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
@@ -22,13 +22,13 @@ function BasicAuth(snInstanceURL, username, password, options) {
 
 BasicAuth.prototype.authenticate = function(callBack) {
 	var request = require('request');
-    request.debug = this.options.verbose;
+    //request.debug = this.options.verbose;
 	request({
 		baseUrl : this.snInstanceURL,
 		method : 'GET',
 		uri : 'api/now/v2/table/sys_user?sysparm_query=user_name%3D' + this.username,
 		json : true,
-		// Here we use the basic authentication. The username and password set here will send 
+		// Here we use the basic authentication. The username and password set here will send
 		// as the authentication header.
 		auth: {
             'user': this.username,
@@ -44,4 +44,3 @@ BasicAuth.prototype.authenticate = function(callBack) {
 		}
 	});
 }
-

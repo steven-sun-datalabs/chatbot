@@ -21,7 +21,7 @@ function Task(snInstanceURL, snCookie, options) {
 // Returns the tasks assigned to user.
 Task.prototype.getTasks = function (callBack) {
     var request = require('request');
-    request.debug = this.options.verbose;
+    //request.debug = this.options.verbose;
     request({
         baseUrl: this.snInstanceURL,
         method: 'GET',

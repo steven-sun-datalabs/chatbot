@@ -119,23 +119,19 @@ app.post("/sms", function (request, response) {
 
       if(res.result.fulfillment.speech == 'Okay')
       {
-        /*
+
         var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
-        client.authenticate(function(err, response, body, cookie) {
+        client.authenticate(function(err, responseClient, body, cookie) {
         	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
-        	client.getTasks(function(err, response, body) {
+        	client.getTasks(function(err, responseClient, body) {
         	    console.log(JSON.stringify(body));
 
               textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
-              console.log('hello');
+
               response.send("<Response><Message>" + textMessage + "</Message></Response>");
         	});
         });
-        */
 
-        textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
-        console.log('hello');
-        response.send("<Response><Message>" + textMessage + "</Message></Response>");
       }
       else
       {
