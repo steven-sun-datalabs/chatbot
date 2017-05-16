@@ -4,7 +4,7 @@ This project contains source code for a [Node.js](https://nodejs.org/) server th
 ## Prerequisites
 * [Node.js](https://nodejs.org/) installed
 * A ServiceNow instance ([Geneva Patch 3](https://docs.servicenow.com/bundle/geneva-release-notes/page/c2/geneva-patch-3-2.html) or later).
-* An instance of API.ai is iinstalled 
+* An instance of API.ai is iinstalled
 
 --------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ This project contains source code for a [Node.js](https://nodejs.org/) server th
 	$ cd chatbot-directory
 	$ npm install
 	```
-	
+
 2. Install the **MyWork Update Set** in your ServiceNow instance. This is a ServiceNow scoped application which contains the **Task Tracker API** Scripted REST API and related files. Note that you must have the admin role on your ServiceNow instance to install update sets.
 	1. Obtain the "My Work" update set
 		* Download the update set from [share.servicenow.com](https://share.servicenow.com/app.do#/detailV2/e43cf2f313de5600e77a36666144b0b4/overview)

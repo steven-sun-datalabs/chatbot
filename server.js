@@ -68,8 +68,8 @@ router.delete('/logout', function(req, res) {
 });
 
 // load the modules
-var BasicAuth = require('../sn_api/basicAuth');
-var Task = require('../sn_api/task');
+var BasicAuth = require('./sn_api/basicAuth');
+var Task = require('./sn_api/task');
 
 // FOR POC ONLY:
 // Preset basic read access to admin
@@ -122,22 +122,23 @@ app.post("/sms", function (request, response) {
       'sessionId': 123456 //not sure if this needs to be changed????
     });
 
-  // 
+  //
   req.on('response', function(res) {
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
     // sudo code
 
       var textMessage = 'Something Went Wrong';
 
-      if(req.result.fulfillment.speech == 'Okay')
+      if(res.result.fulfillment.speech == 'Okay')
       {
 
         var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
         client.authenticate(function(err, response, body, cookie) {
         	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
-        	client.getTasks(function(err, response, body) {
+        	client.getIncidents(function(err, response, body) {
         	    console.log(JSON.stringify(body));
               textMessage = JSON.stringify(body).substring(1,1500);
+
         	});
         });
 
@@ -148,14 +149,14 @@ app.post("/sms", function (request, response) {
               //get results for all incidents
               //set textMessage to the response from the get
               console.log('All Incidents');
-              textMessage = 'All Incidents';
+              //textMessage = 'All Incidents';
             }
             else if (res.result.parameters.RequestedItem == 'Ticket')
             {
               //get results for all tickets
               //set textMessage to the response from the get
               console.log('All Tickets');
-              textMessage = 'All Tickets';
+              //textMessage = 'All Tickets';
             }
             break;
 
@@ -165,14 +166,14 @@ app.post("/sms", function (request, response) {
               //get info on incident for number res.result.paramenters.number
               //set textMessage to the response from the get
               console.log('One Incident');
-              textMessage = 'One Incident';
+              //textMessage = 'One Incident';
             }
             else if (res.result.parameters.RequestedItem == 'Ticket')
             {
               //get info on ticket for number res.result.paramenters.number
               //set textMessage to the response from the get
               console.log('One Ticket');
-              textMessage = 'One Ticket';
+              //textMessage = 'One Ticket';
             }
             break;
 
@@ -186,6 +187,7 @@ app.post("/sms", function (request, response) {
           case apiaiDefaultIntent:
             break;
         }
+
         response.send("<Response><Message>" + textMessage + "</Message></Response>");
 
       }

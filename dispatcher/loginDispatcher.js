@@ -1,14 +1,14 @@
 /*
 Copyright © 2016 ServiceNow, Inc.
- 
+
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 /*
-  This module handles the login requests. It receives the message from browser and extracts the username, password and 
-  ServiceNow instance url from the request. Then authenticate the user with snAuth module and finally saves the cookie 
+  This module handles the login requests. It receives the message from browser and extracts the username, password and
+  ServiceNow instance url from the request. Then authenticate the user with snAuth module and finally saves the cookie
   in client session.
  */
 module.exports = {
@@ -27,7 +27,7 @@ module.exports = {
             var SNAuth = serverRequest.app.get('snAuth');
             var options = serverRequest.app.get('options');
             var snAuth = new SNAuth(body.hosturl, body.username, body.password, options);
-            
+
             // Initialize the sessions to store details.
             serverRequest.session['snConfig'] = {};
             serverRequest.session.snConfig['snInstanceURL'] = body.hosturl;

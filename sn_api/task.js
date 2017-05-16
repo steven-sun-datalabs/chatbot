@@ -19,14 +19,14 @@ function Task(snInstanceURL, snCookie, options) {
 }
 
 // Returns the tasks assigned to user.
-Task.prototype.getTasks = function (callBack) {
+Task.prototype.getIncidents = function (callBack) {
     var request = require('request');
-    request.debug = this.options.verbose;
+    //request.debug = this.options.verbose;
     request({
         baseUrl: this.snInstanceURL,
         method: 'GET',
         // This uri is a part of myTasks service.
-        uri: '/api/x_snc_my_work/v1/tracker/task',
+        uri: '/api/now/table/incident',
         json: true,
         // Set the cookie to authenticate the request.
         headers: {
