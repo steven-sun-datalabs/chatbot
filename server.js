@@ -122,7 +122,7 @@ app.post("/sms", function (request, response) {
       'sessionId': 123456 //not sure if this needs to be changed????
     });
 
-  // 
+  //
   req.on('response', function(res) {
     //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
     // sudo code
@@ -131,68 +131,32 @@ app.post("/sms", function (request, response) {
 
       if(req.result.fulfillment.speech == 'Okay')
       {
-
+        /*
         var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
-        client.authenticate(function(err, response, body, cookie) {
+        client.authenticate(function(err, response1, body, cookie) {
         	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
-        	client.getTasks(function(err, response, body) {
+        	client.getTasks(function(err, response1, body) {
         	    console.log(JSON.stringify(body));
               textMessage = JSON.stringify(body).substring(1,1500);
+
+              textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
+
+              response.send("<Response><Message>" + textMessage + "</Message></Response>");
+
+
+
         	});
         });
+        */
+        textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
 
-        switch (res.result.metadata.intentName) {
-          case 'RequestAll':
-            if(res.result.parameters.RequestedItem == 'Incident')
-            {
-              //get results for all incidents
-              //set textMessage to the response from the get
-              console.log('All Incidents');
-              textMessage = 'All Incidents';
-            }
-            else if (res.result.parameters.RequestedItem == 'Ticket')
-            {
-              //get results for all tickets
-              //set textMessage to the response from the get
-              console.log('All Tickets');
-              textMessage = 'All Tickets';
-            }
-            break;
-
-          case 'RequestOne':
-            if(res.result.parameters.RequestedItem == 'Incident')
-            {
-              //get info on incident for number res.result.paramenters.number
-              //set textMessage to the response from the get
-              console.log('One Incident');
-              textMessage = 'One Incident';
-            }
-            else if (res.result.parameters.RequestedItem == 'Ticket')
-            {
-              //get info on ticket for number res.result.paramenters.number
-              //set textMessage to the response from the get
-              console.log('One Ticket');
-              textMessage = 'One Ticket';
-            }
-            break;
-
-          case 'knowledgeSearch':
-            //Get link from search
-            //set textMessage to the response from the get
-            console.log('Search');
-            textMessage = 'Search';
-            break;
-
-          case apiaiDefaultIntent:
-            break;
-        }
         response.send("<Response><Message>" + textMessage + "</Message></Response>");
-
       }
       else
       {
         response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
       }
+
 
     //
     //respond to twilio with the response from apiai
@@ -208,6 +172,73 @@ app.post("/sms", function (request, response) {
   req.end();
 });
 
+function parseIntent(intent, item, body){
+  textMessage = 'Something Went Wrong';
+  switch (intent) {
+    case 'RequestAll':
+      if(item == 'Incident')
+      {
+        //get results for all incidents
+        //set textMessage to the response from the get
+        console.log('All Incidents');
+        textMessage = 'All Incidents'; //getIncidents(body, 5);
+      }
+      else if (item == 'Ticket')
+      {
+        //get results for all tickets
+        //set textMessage to the response from the get
+        console.log('All Tickets');
+        textMessage = 'All Tickets'; //getTickets(body,5);
+      }
+      break;
+
+    case 'RequestOne':
+      if(item == 'Incident')
+      {
+        //get info on incident for number res.result.paramenters.number
+        //set textMessage to the response from the get
+        console.log('One Incident');
+        textMessage = 'One Incident'; //getIncidents(body, 1);
+      }
+      else if (item == 'Ticket')
+      {
+        //get info on ticket for number res.result.paramenters.number
+        //set textMessage to the response from the get
+        console.log('One Ticket');
+        textMessage = 'One Ticket'; //getTickets(body, 1);
+      }
+      break;
+
+    case 'knowledgeSearch':
+      //Get link from search
+      //set textMessage to the response from the get
+      console.log('Search');
+      textMessage = 'Search'; //something else;
+      break;
+
+    case apiaiDefaultIntent:
+      break;
+  }
+  return textMessage;
+}
+
+function getTickets(body, number){
+  retVal = '';
+  //temp for parsing the full Json
+  for(var i = 0; i &lt; number; i++){
+    //grab the first ticket in body, then set body equal to the substring of everything after the ticket
+  }
+  return retVal;
+}
+
+function getIncidents(body, number){
+  retVal = '';
+  //temp for parsing the full Json
+  for(var i = 0; i &lt; number; i++){
+    //grab the first incident in body, then set body equal to the substring of everything after the incident
+  }
+  return retVal;
+}
 
 // Register the router
 app.use(router);
