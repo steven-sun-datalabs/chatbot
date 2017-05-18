@@ -50,7 +50,7 @@ Task.prototype.getIncidents = function (callBack) {
         baseUrl: this.snInstanceURL,
         method: 'GET',
         // This uri is a part of myTasks service.
-        uri: '/api/now/table/incident?sysparm_query=active%3Dfalse%5Ecaller_id.employee_number%3D1057914&sysparm_display_value=true&sysparm_fields=number%2C%20short_description%2Csys_updated_on%2Cu_state&sysparm_limit=10',
+        uri: '/api/now/table/incident?sysparm_query=active%3Dfalse%5Ecaller_id.employee_number%3D1057914&sysparm_display_value=true&sysparm_fields=number%2C%20short_description%2Csys_updated_on%2Cu_state&sysparm_limit=1',
         json: true,
         // Set the cookie to authenticate the request.
         headers: {
