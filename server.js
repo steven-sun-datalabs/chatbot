@@ -12,12 +12,14 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 // Required packages
 var express = require('express');
-var taskDispatcher = require('./dispatcher/taskDispatcher');
-var loginDispatcher = require('./dispatcher/loginDispatcher');
 var path = require('path');
 var session = require('client-sessions');
 var http = require('http');
 var bodyParser = require('body-parser');
+
+// Dispatchers
+var taskDispatcher = require('./dispatcher/taskDispatcher');
+var loginDispatcher = require('./dispatcher/loginDispatcher');
 
 // Authorization between apiai and server
 var apiai = require('apiai')
@@ -60,23 +62,27 @@ var router = express.Router();
 // Register dispatchers for different types of requests. This application receives following
 // types of http requests from browser.
 router.post('/login', loginDispatcher.login);
-router.get('/tasks', taskDispatcher.getTasks);
-router.get('/task/:taskid/comments', taskDispatcher.getComments);
+router.get('/tasks', taskDispatcher.getIncident);
+router.get('/tasks', taskDispatcher.getIncidents);
+router.get('/tasks', taskDispatcher.getTicket);
+router.get('/tasks', taskDispatcher.getTickets);
 router.delete('/logout', function(req, res) {
     req.session.destroy();
     res.end("Deleted");
 });
 
-// load the modules
+// load the Auth and Task modules
 var BasicAuth = require('./sn_api/basicAuth');
 var Task = require('./sn_api/task');
+
+// establish authorization credentials into jandj sandbox
+var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
 
 // FOR POC ONLY:
 // Preset basic read access to admin
 
 // Introductory response message to prompt the authentication details for the given user
 // Turn this into function to iterate until successful log-in or give up on 5th try
-var jjwwid = "";
 /*
 app.post("/sms", function (request, response) {
 
@@ -105,43 +111,27 @@ app.post("/sms", function (request, response) {
   //console.log(request.body);
 
   // Configures request (gives sessionID #) to API.AI
-
   var req = appapiai.textRequest(request.body.Body, {
           'sessionId': 123456 //not sure if this needs to be changed????
     });
 
-  //
+  // If response from API.AI is "Okay", identify the intent and match to corresponding GET request
   req.on('response', function(res) {
-    //decide if it needs more info, send it back to twilio, otherwise forward it to servicenow
-    // sudo code
+    var textMessage = 'Something Went Wrong';
 
-      var textMessage = 'Something Went Wrong';
+    if(res.result.fulfillment.speech == 'Okay')
+    {
+      textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
+      response.send("<Response><Message>" + textMessage + "</Message></Response>");
+  	}
 
-      if(res.result.fulfillment.speech == 'Okay')
-      {
+    else
+    {
+      response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
+    }
 
-        var client = new BasicAuth('https://jnjacoriosandbox.service-now.com', 'apigee-user', 'Apigee#2017');
-        client.authenticate(function(err, responseClient, body, cookie) {
-        	var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
-        	client.getTasks(function(err, responseClient, body) {
-        	    console.log(JSON.stringify(body));
-
-              textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
-
-              response.send("<Response><Message>" + textMessage + "</Message></Response>");
-        	});
-        });
-
-      }
-      else
-      {
-        response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
-      }
-
-    //respond to twilio with the response from apiai
-
-    //print out the response from apiai
-    console.log(res);
+  //print out the response from apiai
+  console.log(res);
   });
 
   req.on('error', function(error) {
@@ -149,25 +139,34 @@ app.post("/sms", function (request, response) {
   });
 
   req.end();
+
 });
 
 function parseIntent(intent, item, body){
   textMessage = 'Something Went Wrong';
   switch (intent) {
     case 'RequestAll':
-      if(item == 'Incident')
+      if(item == 'Incident') // GET request for 10 Incidents
       {
-        //get results for all incidents
-        //set textMessage to the response from the get
-        console.log('All Incidents');
-        textMessage = 'All Incidents'; //getIncidents(body, 5);
+        client.authenticate(function(err, responseClient, body, cookie) {
+          var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+          client.getIncidents(function(err, responseClient, body) {
+            textMessage = JSON.stringify(body); //set textMessage to the response from the GET
+            console.log(JSON.stringify(body));
+            console.log('All Incidents');
+            });
+          });
       }
-      else if (item == 'Ticket')
+      else if (item == 'Ticket') // GET requests for 10 Tickets
       {
-        //get results for all tickets
-        //set textMessage to the response from the get
-        console.log('All Tickets');
-        textMessage = 'All Tickets'; //getTickets(body,5);
+        client.authenticate(function(err, responseClient, body, cookie) {
+          var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+          client.getTickets(function(err, responseClient, body) {
+            textMessage = JSON.stringify(body);
+            console.log(JSON.stringify(body));
+            console.log('All Tickets');
+            });
+          });
       }
       break;
 
@@ -176,6 +175,14 @@ function parseIntent(intent, item, body){
       {
         //get info on incident for number res.result.paramenters.number
         //set textMessage to the response from the get
+        client.authenticate(function(err, responseClient, body, cookie) {
+          var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+          client.getIncident(function(err, responseClient, body) {
+            textMessage = JSON.stringify(body);
+            console.log(JSON.stringify(body));
+            console.log('All Tickets');
+          });
+        });
         console.log('One Incident');
         textMessage = 'One Incident'; //getIncidents(body, 1);
       }
@@ -183,8 +190,14 @@ function parseIntent(intent, item, body){
       {
         //get info on ticket for number res.result.paramenters.number
         //set textMessage to the response from the get
-        console.log('One Ticket');
-        textMessage = 'One Ticket'; //getTickets(body, 1);
+        client.authenticate(function(err, responseClient, body, cookie) {
+          var client = new Task('https://jnjacoriosandbox.service-now.com', cookie);
+          client.getTicket(function(err, responseClient, body) {
+            textMessage = JSON.stringify(body);
+            console.log(JSON.stringify(body));
+            console.log('One Tickets');
+          });
+        });
       }
       break;
 
@@ -198,25 +211,8 @@ function parseIntent(intent, item, body){
     case apiaiDefaultIntent:
       break;
   }
+
   return textMessage;
-}
-
-function getTickets(body, number){
-  retVal = '';
-  //temp for parsing the full Json
-  for(var i = 0; i < number; i++){
-    //grab the first ticket in body, then set body equal to the substring of everything after the ticket
-  }
-  return retVal;
-}
-
-function getIncidents(body, number){
-  retVal = '';
-  //temp for parsing the full Json
-  for(var i = 0; i < number; i++){
-    //grab the first incident in body, then set body equal to the substring of everything after the incident
-  }
-  return retVal;
 }
 
 // Register the router

@@ -40,6 +40,7 @@ module.exports = {
     },
     // Adds a comments for a given task. Task id is part of the url and comment is send at the request body. Here we
     // assume the user is a legitimate user and should have logged in and viewed tasks before making this request.
+    /*
     addComment: function(serverRequest, serverResponse) {
         var bodyString = '';
         // Aggregate the request body parts to create the whole message.
@@ -72,4 +73,5 @@ module.exports = {
             serverResponse.status(response.statusCode).send(body);
         });
     }
+    */
 }

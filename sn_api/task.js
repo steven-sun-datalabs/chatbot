@@ -18,8 +18,48 @@ function Task(snInstanceURL, snCookie, options) {
     this.options = options;
 }
 
-// Returns the tasks assigned to user.
-Task.prototype.getTasks = function (callBack) {
+// Returns a single (or most recent) incident back to the user
+Task.prototype.getIncident = function (callBack) {
+    var request = require('request');
+    //request.debug = this.options.verbose;
+    request({
+        baseUrl: this.snInstanceURL,
+        method: 'GET',
+        // This uri is a part of myTasks service.
+        uri: '/api/now/table/incident?sysparm_query=active%3Dfalse%5Ecaller_id.employee_number%3D1057914&sysparm_display_value=true&sysparm_fields=number%2C%20short_description%2Csys_updated_on%2Cu_state&sysparm_limit=1'
+        json: true,
+        // Set the cookie to authenticate the request.
+        headers: {
+            'Cookie': this.snCookie
+        }
+
+    }, function (err, response, body) {
+        callBack(err, response, body);
+    });
+}
+
+//
+Task.prototype.getIncidents = function (callBack) {
+    var request = require('request');
+    //request.debug = this.options.verbose;
+    request({
+        baseUrl: this.snInstanceURL,
+        method: 'GET',
+        // This uri is a part of myTasks service.
+        uri: '/api/now/table/incident?sysparm_query=active%3Dfalse%5Ecaller_id.employee_number%3D1057914&sysparm_display_value=true&sysparm_fields=number%2C%20short_description%2Csys_updated_on%2Cu_state&sysparm_limit=10',
+        json: true,
+        // Set the cookie to authenticate the request.
+        headers: {
+            'Cookie': this.snCookie
+        }
+
+    }, function (err, response, body) {
+        callBack(err, response, body);
+    });
+}
+
+//
+Task.prototype.getTicket = function (callBack) {
     var request = require('request');
     //request.debug = this.options.verbose;
     request({
@@ -37,6 +77,27 @@ Task.prototype.getTasks = function (callBack) {
         callBack(err, response, body);
     });
 }
+
+//
+Task.prototype.getTickets = function (callBack) {
+    var request = require('request');
+    //request.debug = this.options.verbose;
+    request({
+        baseUrl: this.snInstanceURL,
+        method: 'GET',
+        // This uri is a part of myTasks service.
+        uri: '/api/x_snc_my_work/v1/tracker/task',
+        json: true,
+        // Set the cookie to authenticate the request.
+        headers: {
+            'Cookie': this.snCookie
+        }
+
+    }, function (err, response, body) {
+        callBack(err, response, body);
+    });
+}
+
 
 // Adds a comment to the task.
 Task.prototype.addComment = function (taskID, comment, callBack) {
