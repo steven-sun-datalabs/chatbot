@@ -61,11 +61,11 @@ var router = express.Router();
 
 // Register dispatchers for different types of requests. This application receives following
 // types of http requests from browser.
-router.post('/login', loginDispatcher.login);
-router.get('/tasks', taskDispatcher.getIncident);
-router.get('/tasks', taskDispatcher.getIncidents);
-router.get('/tasks', taskDispatcher.getTicket);
-router.get('/tasks', taskDispatcher.getTickets);
+//router.post('/login', loginDispatcher.login);
+//router.get('/tasks', taskDispatcher.getIncident);
+//router.get('/tasks', taskDispatcher.getIncidents);
+//router.get('/tasks', taskDispatcher.getTicket);
+//router.get('/tasks', taskDispatcher.getTickets);
 router.delete('/logout', function(req, res) {
     req.session.destroy();
     res.end("Deleted");
@@ -105,6 +105,9 @@ app.post("/sms", function (request, response) {
 });
 */
 
+//
+
+
 // Evaluate intent received from api.ai and send corresponding GET request to ServiceNow
 app.post("/sms", function (request, response) {
   //print out the body from twilio
@@ -116,15 +119,18 @@ app.post("/sms", function (request, response) {
     });
 
   // If response from API.AI is "Okay", identify the intent and match to corresponding GET request
+  // else send back fullfilment text from API.AI
+
   req.on('response', function(res) {
-    var textMessage = 'Something Went Wrong';
+
+    var textMessage = 'parse test';
 
     if(res.result.fulfillment.speech == 'Okay')
     {
-      textMessage = parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem, body);
+      parseIntent(res.result.metadata.intentName, res.result.parameters.RequestedItem);
+      // Figure out asynchronous issue
       response.send("<Response><Message>" + textMessage + "</Message></Response>");
-  	}
-
+    }
     else
     {
       response.send("<Response><Message>" + res.result.fulfillment.speech + "</Message></Response>");
@@ -142,8 +148,9 @@ app.post("/sms", function (request, response) {
 
 });
 
-function parseIntent(intent, item, body){
-  textMessage = 'Something Went Wrong';
+
+function parseIntent(intent, item){
+  textMessage = 'We are still testing this part';
   switch (intent) {
     case 'RequestAll':
       if(item == 'Incident') // GET request for 10 Incidents
@@ -181,6 +188,8 @@ function parseIntent(intent, item, body){
             textMessage = JSON.stringify(body);
             console.log(JSON.stringify(body));
             console.log('All Tickets');
+
+
           });
         });
         console.log('One Incident');
@@ -195,7 +204,7 @@ function parseIntent(intent, item, body){
           client.getTicket(function(err, responseClient, body) {
             textMessage = JSON.stringify(body);
             console.log(JSON.stringify(body));
-            console.log('One Tickets');
+            console.log('One Ticket');
           });
         });
       }
